@@ -1,0 +1,84 @@
+{
+  "rules": [
+    {
+      "name": "exam_eligible_by_attendance",
+      "head": {"subject": "?person", "predicate": "exam_eligible", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "attendance", "object": "?a"},
+        {"subject": "a student", "predicate": "eligible_for_exam_if_attendance_ge", "object": "?min_att"},
+        {"subject": "?a", "predicate": "cmp:ge", "object": "?min_att"}
+      ],
+      "provenance": {"section": "2. Attendance Policy", "clause": "Clause 2.1.1"},
+      "enabled": true
+    },
+    {
+      "name": "exam_eligible_attendance_and_fees",
+      "head": {"subject": "?person", "predicate": "eligible_for_exam", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "attendance", "object": "?a"},
+        {"subject": "?person", "predicate": "fees_paid", "object": "yes"},
+        {"subject": "a student", "predicate": "eligible_for_exam_if_attendance_ge", "object": "?min_att"},
+        {"subject": "?a", "predicate": "cmp:ge", "object": "?min_att"}
+      ],
+      "provenance": {"section": "4. Examination Rules", "clause": "Clause 4.1.1"},
+      "enabled": true
+    },
+    {
+      "name": "exam_debarred_low_attendance",
+      "head": {"subject": "?person", "predicate": "exam_debarred", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "attendance", "object": "?a"},
+        {"subject": "a student", "predicate": "debarred_if_attendance_lt", "object": "?min_debar"},
+        {"subject": "?a", "predicate": "cmp:lt", "object": "?min_debar"}
+      ],
+      "provenance": {"section": "2. Attendance Policy", "clause": "Clause 2.1.2"},
+      "enabled": true
+    },
+    {
+      "name": "condonation_fee_applicable",
+      "head": {"subject": "?person", "predicate": "condonation_fee_inr", "object": "?fee"},
+      "body": [
+        {"subject": "?person", "predicate": "attendance", "object": "?a"},
+        {"subject": "attendance policy", "predicate": "condonation_fee_inr", "object": "?fee"},
+        {"subject": "?a", "predicate": "cmp:ge", "object": "60"},
+        {"subject": "?a", "predicate": "cmp:lt", "object": "75"}
+      ],
+      "provenance": {"section": "2. Attendance Policy", "clause": "Clause 2.1.4"},
+      "enabled": true
+    },
+    {
+      "name": "pass_by_marks",
+      "head": {"subject": "?person", "predicate": "pass", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "total_marks", "object": "?m"},
+        {"subject": "examination rules", "predicate": "pass mark", "object": "?pass"},
+        {"subject": "?m", "predicate": "cmp:ge", "object": "?pass"}
+      ],
+      "provenance": {"section": "4. Examination Rules", "clause": "4. Examination Rules"},
+      "enabled": true
+    },
+    {
+      "name": "distinction_by_marks",
+      "head": {"subject": "?person", "predicate": "distinction", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "total_marks", "object": "?m"},
+        {"subject": "examination rules", "predicate": "distinction mark", "object": "?dist"},
+        {"subject": "?m", "predicate": "cmp:ge", "object": "?dist"}
+      ],
+      "provenance": {"section": "4. Examination Rules", "clause": "4. Examination Rules"},
+      "enabled": true
+    },
+    {
+      "name": "first_division_by_marks",
+      "head": {"subject": "?person", "predicate": "first_division", "object": "yes"},
+      "body": [
+        {"subject": "?person", "predicate": "total_marks", "object": "?m"},
+        {"subject": "examination rules", "predicate": "first division mark", "object": "?fdiv"},
+        {"subject": "?m", "predicate": "cmp:ge", "object": "?fdiv"}
+      ],
+      "provenance": {"section": "4. Examination Rules", "clause": "4. Examination Rules"},
+      "enabled": true
+    }
+  ],
+  "note": "Editable rule base. Each rule is a Horn clause (head :- body). 'cmp:*' predicates are numeric comparisons. Variables start with '?'."
+}

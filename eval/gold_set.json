@@ -1,0 +1,42 @@
+{
+  "description": "Gold test set for the AID201A Document QA system. Each entry maps to a marked evaluation category. 'needs_inference' marks questions that require rule-based derivation rather than direct lookup. 'answerable' is false for questions the KB cannot support (abstention cases).",
+  "questions": [
+    { "id": "G01", "question": "What is the course code?", "expected": "AID201A", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "1. General Information" },
+    { "id": "G02", "question": "What is the course title?", "expected": "Artificial Intelligence", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "1. General Information" },
+    { "id": "G03", "question": "What is the attendance policy's minimum attendance required?", "expected": "75%", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G04", "question": "What is the library's books issued per student?", "expected": "5", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "7. Library Rules" },
+    { "id": "G05", "question": "What is the hostel curfew time?", "expected": "21:00", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "6. Hostel Rules" },
+    { "id": "G06", "question": "What is the pass mark?", "expected": "40%", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G07", "question": "What is the distinction mark?", "expected": "75%", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G08", "question": "What is the end-semester weight?", "expected": "70%", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G09", "question": "What is the tuition fee per semester?", "expected": "45000 INR", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "3. Fee Schedule" },
+    { "id": "G10", "question": "When is the end-semester exam start date?", "expected": "5 December 2025", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "10. Important Dates" },
+    { "id": "G11", "question": "What is the revaluation last date?", "expected": "27 January 2026", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "10. Important Dates" },
+    { "id": "G12", "question": "What is the examination office phone?", "expected": "+91-11-2334-5566", "category": "direct_lookup", "needs_inference": false, "answerable": true, "section": "8. Contact Information" },
+
+    { "id": "G13", "question": "Is the calculator allowed?", "expected": "Yes", "category": "boolean", "needs_inference": false, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G14", "question": "Is the mobile phone allowed?", "expected": "No", "category": "boolean", "needs_inference": false, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G15", "question": "Is reference books issuable?", "expected": "No", "category": "boolean", "needs_inference": false, "answerable": true, "section": "7. Library Rules" },
+    { "id": "G16", "question": "Is Sunday library closed?", "expected": "Yes", "category": "boolean", "needs_inference": false, "answerable": true, "section": "7. Library Rules" },
+
+    { "id": "G17", "question": "Which component has weight 70%?", "expected": "End-Semester Exam", "category": "reverse_lookup", "needs_inference": false, "answerable": true, "section": "9. Course Assessment Table" },
+    { "id": "G18", "question": "Which component has weight 30%?", "expected": "Mid-Semester Exam", "category": "reverse_lookup", "needs_inference": false, "answerable": true, "section": "9. Course Assessment Table" },
+
+    { "id": "G19", "question": "Is a student with 80% attendance eligible?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G20", "question": "Is a student with 58% attendance eligible?", "expected": "No", "category": "inference", "needs_inference": true, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G21", "question": "Is a student with 58% attendance debarred?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G22", "question": "Is a student with 70% attendance eligible?", "expected": "No", "category": "inference", "needs_inference": true, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G23", "question": "Is a student scoring 85 marks a distinction?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G24", "question": "Is a student scoring 35 marks a pass?", "expected": "No", "category": "inference", "needs_inference": true, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G25", "question": "Is a student scoring 90 marks a pass?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G26", "question": "Is a student scoring 60 marks a first division?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "4. Examination Rules" },
+    { "id": "G27", "question": "Is a student with 45% attendance debarred?", "expected": "Yes", "category": "inference", "needs_inference": true, "answerable": true, "section": "2. Attendance Policy" },
+    { "id": "G28", "question": "Is a student scoring 70 marks a distinction?", "expected": "No", "category": "inference", "needs_inference": true, "answerable": true, "section": "4. Examination Rules" },
+
+    { "id": "G29", "question": "What is the weather tomorrow?", "expected": "Not in document", "category": "unanswerable", "needs_inference": false, "answerable": false, "section": null },
+    { "id": "G30", "question": "What is the instructor's salary?", "expected": "Not in document", "category": "unanswerable", "needs_inference": false, "answerable": false, "section": null },
+    { "id": "G31", "question": "Which student topped the class?", "expected": "Not in document", "category": "unanswerable", "needs_inference": false, "answerable": false, "section": null },
+    { "id": "G32", "question": "Is the exam offline or online?", "expected": "Not in document", "category": "unanswerable", "needs_inference": false, "answerable": false, "section": null },
+    { "id": "G33", "question": "What is the hostel mess menu?", "expected": "Not in document", "category": "unanswerable", "needs_inference": false, "answerable": false, "section": null }
+  ]
+}

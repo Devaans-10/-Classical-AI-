@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AID201A Classical AI Document QA System</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Inline theme init: apply stored/OS theme before paint to avoid flash -->
+  <script>
+    (function(){
+      var key='aid201a_theme'; var stored=localStorage.getItem(key);
+      var prefersLight=window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      var theme = stored || (prefersLight ? 'light' : 'dark');
+      document.body.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+
+<body>
+
+  <!-- ======================================================================= -->
+  <!-- Top App Navigation Bar                                                  -->
+  <!-- ======================================================================= -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo-glow">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="brand-title-row">
+          <h1 class="brand-title">AID201A Classical AI</h1>
+          <span class="system-tag">Symbolic Engine</span>
+        </div>
+        <p class="brand-subtitle">Knowledge Representation · Horn-Clause Inference · Graph Search</p>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="meta-pill constraint-pill">
+        <span class="pulse-indicator">
+          <span class="pulse-ring"></span>
+          <span class="pulse-core"></span>
+        </span>
+        <span class="pill-text">Zero NLP · No RAG · No LLM</span>
+      </div>
+
+      <div class="meta-pill kb-pill" id="kbMetaBadge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span class="kb-doc-name" id="headerDocName">handbook.md</span>
+        <span class="pill-dot"></span>
+        <span class="kb-fact-count" id="headerFactCount">127 facts</span>
+      </div>
+
+      <button class="btn btn-sm btn-outline" id="btnThemeToggle" aria-label="Toggle light/dark theme" title="Toggle light/dark theme" data-theme="dark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="theme-label" id="themeLabel">Dark</span>
+      </button>
+      <button class="btn btn-eval-glow" id="btnOpenEval">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 20V10"></path>
+          <path d="M12 20V4"></path>
+          <path d="M6 20v-6"></path>
+        </svg>
+        <span>Evaluation & Ablation</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- Main Workspace (Desktop: 3 Panels)                                      -->
+  <!-- ======================================================================= -->
+  <main class="workspace-container">
+
+    <!-- PANEL 1: Left Panel (Documents & KB Summary) -->
+    <aside class="panel panel-left" id="panelLeft">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon-wrap icon-cyan">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          </div>
+          <span>Document & Knowledge Base</span>
+        </div>
+      </div>
+
+      <div class="panel-scroll-content">
+
+        <!-- Upload Drop Zone -->
+        <div class="upload-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".pdf,.docx,.md,.txt" class="file-input-hidden">
+          <div class="upload-icon-pulse">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="upload-text-content">
+            <p class="upload-label">Drag & drop document or <span class="upload-link">browse</span></p>
+            <p class="upload-formats">Structure parsed from PDF, DOCX, Markdown, TXT</p>
+          </div>
+          <div class="upload-progress-bar" id="uploadProgress">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Reload Sample Handbook Action -->
+        <div class="sample-actions-row">
+          <button class="btn btn-ghost-subtle btn-xs" id="btnReloadSample">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>Reset to Course Handbook</span>
+          </button>
+        </div>
+
+        <!-- Metric Stat Tiles with Spark Bars -->
+        <div class="stat-tiles-row">
+          <div class="stat-tile tile-cyan">
+            <div class="stat-top">
+              <span class="stat-lbl">Facts</span>
+              <span class="stat-pill-badge">Triples</span>
+            </div>
+            <div class="stat-number" id="summaryFacts">127</div>
+            <div class="stat-spark-bar">
+              <div class="spark-fill spark-cyan" style="width: 85%;"></div>
+            </div>
+          </div>
+
+          <div class="stat-tile tile-violet">
+            <div class="stat-top">
+              <span class="stat-lbl">Rules</span>
+              <span class="stat-pill-badge">Horn</span>
+            </div>
+            <div class="stat-number" id="summaryRules">7</div>
+            <div class="stat-spark-bar">
+              <div class="spark-fill spark-violet" style="width: 70%;"></div>
+            </div>
+          </div>
+
+          <div class="stat-tile tile-emerald">
+            <div class="stat-top">
+              <span class="stat-lbl">Sections</span>
+              <span class="stat-pill-badge">Parsed</span>
+            </div>
+            <div class="stat-number" id="summarySections">13</div>
+            <div class="stat-spark-bar">
+              <div class="spark-fill spark-emerald" style="width: 60%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Segmented Tab Controls with Sliding Indicator -->
+        <div class="segmented-control" id="segmentedControl">
+          <div class="segmented-glider" id="segmentedGlider"></div>
+          <button class="segmented-tab active" data-tab="sections">
+            <span>Sections</span>
+          </button>
+          <button class="segmented-tab" data-tab="facts">
+            <span>Triples KB</span>
+          </button>
+          <button class="segmented-tab" data-tab="rules">
+            <span>Rules</span>
+          </button>
+          <button class="segmented-tab" data-tab="schema">
+            <span>Schema</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: Sections Viewer (Formatted Key/Value Rows) -->
+        <div class="tab-pane active" id="tabSections">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="sectionSearchInput" placeholder="Filter sections or clauses..." class="input-modern">
+          </div>
+          <div class="section-cards-list" id="sectionList">
+            <!-- Dynamically populated with formatted key/value rows -->
+          </div>
+        </div>
+
+        <!-- TAB 2: Triples Explorer -->
+        <div class="tab-pane" id="tabFacts">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="factsFilter" placeholder="Search subject, predicate, or value..." class="input-modern">
+          </div>
+          <div class="triples-table-wrap">
+            <table class="triples-table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Predicate</th>
+                  <th>Object</th>
+                  <th>Citation</th>
+                </tr>
+              </thead>
+              <tbody id="factsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: Horn-Clause Rules -->
+        <div class="tab-pane" id="tabRules">
+          <div class="tab-banner banner-info">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Rules are evaluated via forward & backward chaining with numeric comparison operators.</span>
+          </div>
+          <div class="rules-list" id="rulesList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- TAB 4: Knowledge Representation Schema -->
+        <div class="tab-pane" id="tabSchema">
+          <div class="schema-container" id="schemaInfo">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- PANEL 2: Centre Panel (Chat & Q&A) -->
+    <section class="panel panel-center" id="panelCenter">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon-wrap icon-indigo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <span>Deterministic Question Answering</span>
+        </div>
+        <div class="panel-header-actions">
+          <button class="btn btn-ghost-subtle btn-xs" id="btnClearChat" title="Clear conversation history">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Clear Chat</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Scroll Area -->
+      <div class="chat-messages-area" id="chatMessages">
+
+        <!-- Designed Hero Empty State (Inviting + 4-Step Pipeline + Example Cards) -->
+        <div class="chat-hero-empty" id="chatHeroEmpty">
+          <div class="hero-header-badge">
+            <span class="hero-badge-tag">AID201A Classical AI Coursework</span>
+          </div>
+          <h2 class="hero-title">Ask Questions with Absolute Proof</h2>
+          <p class="hero-subtitle">
+            Ground truth is derived purely from structured triples in <code class="hero-doc-tag" id="heroDocTag">handbook.md</code>.
+            Every answer provides an unbroken reasoning chain and document provenance.
+          </p>
+
+          <!-- 4-Stage Architecture Strip -->
+          <div class="pipeline-strip">
+            <div class="pipeline-step">
+              <div class="pipe-num">01</div>
+              <div class="pipe-info">
+                <strong>Structural Parse</strong>
+                <span>Tables, clauses & keys</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step">
+              <div class="pipe-num">02</div>
+              <div class="pipe-info">
+                <strong>Knowledge Base</strong>
+                <span>Indexed (s, p, o) triples</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step">
+              <div class="pipe-num">03</div>
+              <div class="pipe-info">
+                <strong>Horn Chaining</strong>
+                <span>Backward goal search</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step">
+              <div class="pipe-num">04</div>
+              <div class="pipe-info">
+                <strong>Proven Citation</strong>
+                <span>Section & clause proof</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2-Column Suggestion Cards Grid (No Cramping/Truncation) -->
+          <div class="hero-suggestions-section">
+            <div class="hero-suggestions-header">
+              <span>Try asking a benchmark question:</span>
+            </div>
+            <div class="suggestions-grid">
+              <button class="suggest-card" data-q="What is the course code?">
+                <div class="suggest-icon icon-indigo">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">What is the course code?</div>
+                  <div class="suggest-desc">Direct predicate lookup in Section 1</div>
+                </div>
+              </button>
+
+              <button class="suggest-card" data-q="Is a student with 80% attendance eligible?">
+                <div class="suggest-icon icon-cyan">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">Is a student with 80% attendance eligible?</div>
+                  <div class="suggest-desc">Rule inference: attendance ≥ 75% threshold</div>
+                </div>
+              </button>
+
+              <button class="suggest-card" data-q="Is a student with 58% attendance debarred?">
+                <div class="suggest-icon icon-rose">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">Is a student with 58% attendance debarred?</div>
+                  <div class="suggest-desc">Debarment rule check: attendance &lt; 60%</div>
+                </div>
+              </button>
+
+              <button class="suggest-card" data-q="Is a student with 70% attendance eligible?">
+                <div class="suggest-icon icon-amber">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">Is a student with 70% attendance eligible?</div>
+                  <div class="suggest-desc">Condonation rule: 60-74% fee required</div>
+                </div>
+              </button>
+
+              <button class="suggest-card" data-q="Which component has weight 70%?">
+                <div class="suggest-icon icon-emerald">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">Which component has weight 70%?</div>
+                  <div class="suggest-desc">Reverse query over assessment table</div>
+                </div>
+              </button>
+
+              <button class="suggest-card suggest-card-abstain" data-q="What is the weather tomorrow?">
+                <div class="suggest-icon icon-dim">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+                </div>
+                <div class="suggest-body">
+                  <div class="suggest-title">What is the weather tomorrow?</div>
+                  <div class="suggest-desc">Abstention test: strictly returns Not in document</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Quick Suggestion Pill Bar (Visible when conversation is active) -->
+      <div class="chat-pills-row" id="chatPillsRow" style="display: none;">
+        <span class="pills-title">Quick Queries:</span>
+        <div class="pills-track">
+          <button class="pill-chip" data-q="What is the pass mark?">Pass mark</button>
+          <button class="pill-chip" data-q="Is the calculator allowed?">Calculator allowed?</button>
+          <button class="pill-chip" data-q="Is a student scoring 85 marks a distinction?">85 marks distinction?</button>
+          <button class="pill-chip" data-q="When is the end-semester exam start date?">Exam date</button>
+          <button class="pill-chip" data-q="What is the library's books issued per student?">Library quota</button>
+          <button class="pill-chip pill-chip-amber" data-q="What is the cafeteria lunch menu?">Cafeteria menu (abstain)</button>
+        </div>
+      </div>
+
+      <!-- Floating Elevated Input Composer -->
+      <div class="chat-composer-wrap">
+        <form id="chatForm" class="composer-card">
+          <div class="composer-input-row">
+            <svg class="composer-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="questionInput"
+              class="composer-input"
+              placeholder="Ask a question grounded in the document (e.g. 'Is a student with 80% attendance eligible?')..."
+              autocomplete="off"
+              required
+            >
+            <button type="submit" class="btn btn-primary btn-composer-send" id="btnSubmit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span>Ask</span>
+            </button>
+          </div>
+          <div class="composer-footer">
+            <div class="composer-hint">
+              <span>Press <kbd>Enter ↵</kbd> to query Knowledge Base</span>
+            </div>
+            <div class="composer-tags">
+              <span class="mono-badge">Lookup</span>
+              <span class="mono-badge">Boolean</span>
+              <span class="mono-badge">Reverse</span>
+              <span class="mono-badge">Chaining</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- PANEL 3: Right Panel (Reasoning Trace & Citations) -->
+    <aside class="panel panel-right" id="panelRight">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon-wrap icon-violet">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <span>Reasoning Trace & Citations</span>
+        </div>
+        <div class="trace-header-action" id="traceHeaderAction" style="display: none;">
+          <button class="btn btn-ghost-subtle btn-xs" id="btnCopyTrace" title="Copy reasoning trace to clipboard">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copy Trace</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-scroll-content" id="traceContainer">
+
+        <!-- Illustrated & Animated Trace Placeholder DAG -->
+        <div class="trace-empty-illustrative" id="emptyTrace">
+          <div class="dag-graph-illustration">
+            <svg class="dag-svg" width="220" height="160" viewBox="0 0 220 160" fill="none">
+              <!-- Animated connecting lines -->
+              <path class="dag-line dag-line-1" d="M110 24 L55 70" stroke="var(--border-subtle)" stroke-width="1.8" stroke-dasharray="3 3"></path>
+              <path class="dag-line dag-line-2" d="M110 24 L165 70" stroke="var(--border-subtle)" stroke-width="1.8" stroke-dasharray="3 3"></path>
+              <path class="dag-line dag-line-3" d="M55 70 L110 130" stroke="var(--border-subtle)" stroke-width="1.8" stroke-dasharray="3 3"></path>
+              <path class="dag-line dag-line-4" d="M165 70 L110 130" stroke="var(--border-subtle)" stroke-width="1.8" stroke-dasharray="3 3"></path>
+
+              <!-- Node: Question -->
+              <circle cx="110" cy="24" r="14" fill="#131d33" stroke="#6366f1" stroke-width="1.8"></circle>
+              <text x="110" y="27" text-anchor="middle" fill="#f8fafc" font-size="8" font-family="var(--font-mono)">Q</text>
+
+              <!-- Node: Working Fact -->
+              <circle cx="55" cy="70" r="14" fill="#131d33" stroke="#06b6d4" stroke-width="1.8"></circle>
+              <text x="55" y="73" text-anchor="middle" fill="#f8fafc" font-size="8" font-family="var(--font-mono)">Fact</text>
+
+              <!-- Node: Horn Rule -->
+              <circle cx="165" cy="70" r="14" fill="#131d33" stroke="#818cf8" stroke-width="1.8"></circle>
+              <text x="165" y="73" text-anchor="middle" fill="#f8fafc" font-size="8" font-family="var(--font-mono)">Rule</text>
+
+              <!-- Node: Derived Answer -->
+              <circle cx="110" cy="130" r="14" fill="#131d33" stroke="#10b981" stroke-width="1.8"></circle>
+              <text x="110" y="133" text-anchor="middle" fill="#f8fafc" font-size="8" font-family="var(--font-mono)">Proof</text>
+            </svg>
+          </div>
+          <h3 class="empty-trace-title">Inference Chain Inspector</h3>
+          <p class="empty-trace-p">
+            Submit any query to watch the engine map the pattern, evaluate working facts against Horn clauses, and construct an auditable reasoning chain with document provenance.
+          </p>
+        </div>
+
+        <!-- Active Populated Trace View -->
+        <div class="active-trace-content" id="activeTrace" style="display: none;">
+
+          <!-- Question Context Card -->
+          <div class="trace-question-box">
+            <div class="trace-q-tag">Selected Question</div>
+            <div class="trace-q-title" id="traceQuestion">Question text here</div>
+            <div class="trace-chips-row">
+              <span class="badge" id="traceStatusBadge">Answered</span>
+              <span class="trace-chip mono" id="traceTemplateTag">template: eligibility_inf</span>
+              <span class="trace-chip mono" id="traceTimeTag">0.4 ms</span>
+              <span class="trace-chip mono" id="traceConfTag">95% conf</span>
+            </div>
+          </div>
+
+          <!-- Timeline Section -->
+          <div class="trace-section-header">
+            <span>Inference Chain Execution</span>
+            <span class="step-count-badge" id="traceStepCountBadge">5 steps</span>
+          </div>
+
+          <div class="timeline-container" id="traceStepsTimeline">
+            <!-- Dynamically populated timeline cards -->
+          </div>
+
+          <!-- Document Provenance Citations Section -->
+          <div class="trace-section-header">
+            <span>Document Provenance Citations</span>
+          </div>
+
+          <div class="citations-container" id="citationsList">
+            <!-- Dynamically populated citation chips -->
+          </div>
+
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- Mobile Bottom Tab Navigation (360px and up)                             -->
+  <!-- ======================================================================= -->
+  <nav class="mobile-nav-bar" id="mobileNavBar">
+    <button class="mobile-tab-btn active" data-panel="panelLeft">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <span>KB & Doc</span>
+    </button>
+    <button class="mobile-tab-btn" data-panel="panelCenter">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>Chat</span>
+    </button>
+    <button class="mobile-tab-btn" data-panel="panelRight">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      <span>Trace</span>
+    </button>
+    <button class="mobile-tab-btn" id="btnMobileEval">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 20V10"></path>
+        <path d="M12 20V4"></path>
+        <path d="M6 20v-6"></path>
+      </svg>
+      <span>Eval</span>
+    </button>
+  </nav>
+
+  <!-- ======================================================================= -->
+  <!-- Evaluation & Ablation Modal Dialog                                      -->
+  <!-- ======================================================================= -->
+  <div class="modal-backdrop" id="evalModal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="panel-icon-wrap icon-indigo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10"></path>
+              <path d="M12 20V4"></path>
+              <path d="M6 20v-6"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="modal-heading">Gold Benchmark & Ablation Study</h3>
+            <span class="modal-subheading">AID201A Classical Artificial Intelligence Evaluation Suite</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseEvalModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Metric Counters Row -->
+        <div class="eval-metrics-grid">
+          <div class="metric-card card-emerald">
+            <span class="card-metric-label">Overall Accuracy</span>
+            <div class="card-metric-val" id="evalAccuracy">100.0%</div>
+            <span class="card-metric-sub" id="evalCorrectRatio">35 / 35 test cases correct</span>
+          </div>
+          <div class="metric-card card-indigo">
+            <span class="card-metric-label">Precision / Recall</span>
+            <div class="card-metric-val" id="evalPrecisionRecall">1.00 / 1.00</div>
+            <span class="card-metric-sub" id="evalF1">F1 Score: 1.00</span>
+          </div>
+          <div class="metric-card card-cyan">
+            <span class="card-metric-label">Inference Accuracy</span>
+            <div class="card-metric-val" id="evalInferenceAcc">100.0%</div>
+            <span class="card-metric-sub">12 / 12 inference goals proved</span>
+          </div>
+          <div class="metric-card card-amber">
+            <span class="card-metric-label">Abstention Rate</span>
+            <div class="card-metric-val" id="evalAbstention">20.0%</div>
+            <span class="card-metric-sub">7 / 7 unanswerable abstained</span>
+          </div>
+        </div>
+
+        <!-- High-Impact Ablation Card -->
+        <div class="ablation-feature-card">
+          <div class="ablation-feature-header">
+            <div>
+              <h4 class="ablation-feature-title">Ablation Study: Direct Impact of Classical Horn Rules</h4>
+              <p class="ablation-feature-desc">Comparing full reasoning system (With Rules) against non-inferencing base lookup (Without Rules).</p>
+            </div>
+            <span class="ablation-tag-badge">+20.0% Net Accuracy Gain</span>
+          </div>
+
+          <div class="ablation-bars-list">
+            <div class="ablation-bar-item">
+              <div class="ablation-bar-labels">
+                <span class="bar-title">Overall System Accuracy</span>
+                <span class="bar-delta-text" id="ablAccGainText">+20.0% Gain</span>
+              </div>
+              <div class="dual-progress-bar">
+                <div class="progress-segment segment-with" id="ablWithAccBar" style="width: 100%;">
+                  <span>With Rules: 100%</span>
+                </div>
+                <div class="progress-segment segment-without" id="ablWithoutAccBar" style="width: 80%;">
+                  <span>Without Rules: 80%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ablation-bar-item">
+              <div class="ablation-bar-labels">
+                <span class="bar-title">Inference-Required Questions (12 Questions)</span>
+                <span class="bar-delta-text text-cyan" id="ablInfGainText">+58.3% Critical Gain</span>
+              </div>
+              <div class="dual-progress-bar">
+                <div class="progress-segment segment-with" id="ablWithInfBar" style="width: 100%;">
+                  <span>With Rules: 100% (12/12)</span>
+                </div>
+                <div class="progress-segment segment-without" id="ablWithoutInfBar" style="width: 41.7%;">
+                  <span>Without Rules: 41.7% (5/12)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Benchmark Table -->
+        <div class="modal-section-title-row">
+          <h4 class="modal-sec-title">Benchmark Test Cases (35 Gold Questions)</h4>
+          <span class="modal-sec-count">16 Direct · 12 Inference · 7 Unanswerable</span>
+        </div>
+
+        <div class="benchmark-table-wrap">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Question</th>
+                <th>Expected Answer</th>
+                <th>Derived System Answer</th>
+                <th>Verdict</th>
+                <th>Latency</th>
+              </tr>
+            </thead>
+            <tbody id="evalTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" id="btnRerunEval">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Re-run Evaluation Benchmark</span>
+        </button>
+        <button class="btn btn-primary btn-sm" id="btnCloseEvalBtn">Close Benchmark</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
